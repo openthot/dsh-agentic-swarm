@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DSH Agentic Swarm & Telegram Hermes Remote Control</title>
+  <meta name="description" content="Autonomous multi-agent swarm and Telegram Hermes-style remote control plugin for DeepSeek Harness (DSH). Inter-agent communication, autonomous MCP tools, and self-healing.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐝</text></svg>">
+</head>
+<body>
+
+  <!-- Ambient Glow Background -->
+  <div class="ambient-glow" aria-hidden="true"></div>
+
+  <!-- Navigation Bar -->
+  <header class="nav-header">
+    <div class="nav-container">
+      <a href="#" class="brand-link" aria-label="DSH Agentic Swarm Home">
+        <div class="brand-icon" aria-hidden="true">🐝</div>
+        <span>DSH Swarm</span>
+      </a>
+      <nav aria-label="Main Navigation">
+        <ul class="nav-links">
+          <li><a href="#architecture">Architecture</a></li>
+          <li><a href="#topology">Topology</a></li>
+          <li><a href="#telegram">Telegram Hermes</a></li>
+          <li><a href="#mcp">MCP Autonomy</a></li>
+          <li><a href="#docs">Docs</a></li>
+        </ul>
+      </nav>
+      <div class="nav-cta">
+        <a href="#docs" class="btn-secondary">Install Guide</a>
+        <a href="https://github.com/openthot/dsh-agentic-swarm" target="_blank" rel="noopener noreferrer" class="btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main>
+    <section class="hero-section" aria-labelledby="hero-title">
+      <div class="eyebrow-badge">
+        <span class="dot" aria-hidden="true"></span>
+        <span>DeepSeek Harness Plugin • Multi-Agent Swarm • Telegram Hermes Control</span>
+      </div>
+      <h1 id="hero-title" class="hero-title">
+        Coordinated Intelligence.<br>Unprecedented Autonomy.
+      </h1>
+      <p class="hero-subtitle">
+        Deploy an autonomous multi-agent swarm into DSH. Specialized subagents communicate in real time, share a decentralized blackboard, and invoke MCP tools & skills without human intervention.
+      </p>
+
+      <div class="hero-cta-group">
+        <a href="#docs" class="btn-primary">Get Started</a>
+        <a href="#telegram" class="btn-secondary">Test Telegram Bot</a>
+      </div>
+
+      <!-- Quick Install Snippet -->
+      <div class="quick-install-box">
+        <code id="cmd-install">dsh plugin --profile web add dsh-agentic-swarm</code>
+        <button class="copy-btn" data-copy="cmd-install" aria-label="Copy installation command">Copy</button>
+      </div>
+    </section>
+
+    <!-- Interactive Swarm Topology Visualizer -->
+    <section id="topology" class="section" aria-labelledby="topology-title">
+      <div class="section-header">
+        <div class="section-tag">Interactive Topology</div>
+        <h2 id="topology-title" class="section-title">The Swarm Mesh Network</h2>
+        <p class="section-desc">
+          Click any specialized agent below to inspect its behavior, active tools, system prompt, and peer-to-peer message routing.
+        </p>
+      </div>
+
+      <div class="bento-card visualizer-card">
+        <div class="visualizer-viewport">
+          <div class="agent-nodes-wrapper">
+            <!-- SVG Mesh Lines -->
+            <svg class="topology-svg" viewBox="0 0 680 380" aria-hidden="true">
+              <!-- Coordinator to Architect & Researcher -->
+              <line x1="340" y1="40" x2="160" y2="150" class="topology-line active" />
+              <line x1="340" y1="40" x2="520" y2="150" class="topology-line active" />
+              <!-- Architect to Coder & MCP -->
+              <line x1="160" y1="150" x2="110" y2="280" class="topology-line" />
+              <line x1="160" y1="150" x2="570" y2="280" class="topology-line" />
+              <!-- Researcher to MCP -->
+              <line x1="520" y1="150" x2="110" y2="280" class="topology-line active" />
+              <!-- Coder to Critic -->
+              <line x1="570" y1="280" x2="340" y2="350" class="topology-line active" />
+              <!-- MCP to Critic -->
+              <line x1="110" y1="280" x2="340" y2="350" class="topology-line" />
+              <!-- Critic to Coordinator feedback loop -->
+              <line x1="340" y1="350" x2="340" y2="40" class="topology-line active" stroke="#FF9F0A" />
+            </svg>
+
+            <!-- Agent Nodes -->
+            <div class="agent-node node-coordinator active" data-agent="coordinator" tabindex="0" role="button" aria-label="Lead Coordinator Agent">
+              <div class="node-icon" style="background: rgba(0, 113, 227, 0.2); color: #58A6FF;">👑</div>
+              <div class="node-info">
+                <div class="node-name">Lead Coordinator</div>
+                <div class="node-role">Planning & Delegation</div>
+              </div>
+            </div>
+
+            <div class="agent-node node-architect" data-agent="architect" tabindex="0" role="button" aria-label="System Architect Agent">
+              <div class="node-icon" style="background: rgba(175, 82, 222, 0.2); color: #D2A8FF;">📐</div>
+              <div class="node-info">
+                <div class="node-name">System Architect</div>
+                <div class="node-role">Invariants & Schemas</div>
+              </div>
+            </div>
+
+            <div class="agent-node node-researcher" data-agent="researcher" tabindex="0" role="button" aria-label="Intelligence Researcher Agent">
+              <div class="node-icon" style="background: rgba(48, 209, 88, 0.2); color: #7EE787;">🔬</div>
+              <div class="node-info">
+                <div class="node-name">Researcher</div>
+                <div class="node-role">Docs & Web Intel</div>
+              </div>
+            </div>
+
+            <div class="agent-node node-mcp" data-agent="mcp" tabindex="0" role="button" aria-label="MCP & Skill Specialist Agent">
+              <div class="node-icon" style="background: rgba(41, 151, 255, 0.2); color: #70B8FF;">⚡</div>
+              <div class="node-info">
+                <div class="node-name">MCP Specialist</div>
+                <div class="node-role">Autonomous Tools</div>
+              </div>
+            </div>
+
+            <div class="agent-node node-coder" data-agent="coder" tabindex="0" role="button" aria-label="Autonomous Coder Agent">
+              <div class="node-icon" style="background: rgba(255, 159, 10, 0.2); color: #FFA657;">💻</div>
+              <div class="node-info">
+                <div class="node-name">Autonomous Coder</div>
+                <div class="node-role">Implementation & Tests</div>
+              </div>
+            </div>
+
+            <div class="agent-node node-critic" data-agent="critic" tabindex="0" role="button" aria-label="Adversarial Critic Agent">
+              <div class="node-icon" style="background: rgba(255, 55, 95, 0.2); color: #FF7597;">🔍</div>
+              <div class="node-info">
+                <div class="node-name">Adversarial Critic</div>
+                <div class="node-role">Audit & Self-Healing</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Agent Inspector Drawer -->
+        <div class="agent-inspector" aria-live="polite">
+          <div class="inspector-header">
+            <div id="inspector-title" class="inspector-title">Swarm Lead Coordinator</div>
+            <div id="inspector-status" class="inspector-status">
+              <span class="dot" style="background: var(--accent-emerald);"></span> ACTIVE • SUPERVISING
+            </div>
+          </div>
+          <p id="inspector-prompt" class="inspector-prompt">
+            Analyzes high-level objectives, decomposes missions into prioritized subtasks, supervises specialist progress, and synthesizes verified deliverables.
+          </p>
+          <div id="inspector-caps" style="display: flex; gap: 0.4rem; margin-top: 0.5rem;">
+            <span class="card-badge badge-blue">Dynamic Planning</span>
+            <span class="card-badge badge-blue">Subtask Delegation</span>
+            <span class="card-badge badge-blue">Synthesis</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bento Grid Features -->
+    <section id="architecture" class="section" aria-labelledby="features-title">
+      <div class="section-header">
+        <div class="section-tag">Key Pillars</div>
+        <h2 id="features-title" class="section-title">Engineered for Radical Autonomy</h2>
+        <p class="section-desc">
+          Every layer of the swarm is built on Cordis lifecycle principles and DeepSeek Harness protocols.
+        </p>
+      </div>
+
+      <div class="bento-grid">
+        <!-- Card 1: Autonomous MCP & Skills -->
+        <div class="bento-card card-span-8">
+          <span class="card-badge badge-blue">Autonomous Execution</span>
+          <h3 class="card-title">Zero-Intervention MCP & Skill Execution</h3>
+          <p class="card-text">
+            Subagents autonomously discover and execute external Model Context Protocol (MCP) servers and DSH skills without prompting the user. From Playwright browser automation and ClickUp tasks to file operations and web search, tools are resolved and dispatched on-the-fly.
+          </p>
+          <div class="code-block">
+// Autonomous subagent invoking MCP tool dynamically
+const res = await mcpBridge.executeTool('clickup_create_task', {
+  name: 'Implement neural backtesting engine',
+  list_id: '9012019'
+});
+          </div>
+        </div>
+
+        <!-- Card 2: Shared Blackboard -->
+        <div class="bento-card card-span-4">
+          <span class="card-badge badge-purple">Decentralized Memory</span>
+          <h3 class="card-title">Swarm Blackboard</h3>
+          <p class="card-text">
+            Shared high-speed key-value store and message bus. Subagents exchange schemas, intermediate code, and telemetry seamlessly.
+          </p>
+          <div style="font-family: var(--font-mono); font-size: 0.8rem; color: #86868B; line-height: 1.8;">
+            <div>• bus.sendDirect('coder', 'architect')</div>
+            <div>• bus.broadcast('coordinator', 'Phase 2')</div>
+            <div>• bus.setBlackboard('api_schema', spec)</div>
+          </div>
+        </div>
+
+        <!-- Card 3: Adversarial Critic & Self-Healing -->
+        <div class="bento-card card-span-6">
+          <span class="card-badge badge-emerald">Adversarial Verification</span>
+          <h3 class="card-title">Automated Self-Healing Loop</h3>
+          <p class="card-text">
+            The Critic Agent acts as an adversarial auditor. If code syntax, test coverage, or security requirements fall short, the Critic rejects the deliverable and issues specific remediation tickets, re-triggering subagent refinement automatically.
+          </p>
+        </div>
+
+        <!-- Card 4: DSH Web Integration -->
+        <div class="bento-card card-span-6">
+          <span class="card-badge badge-amber">Native DSH Suite</span>
+          <h3 class="card-title">Built-in DSH Tools & REST API</h3>
+          <p class="card-text">
+            Directly registers <code>swarm_dispatch</code>, <code>swarm_status</code>, <code>swarm_broadcast</code>, and <code>swarm_tool_exec</code> into the model's toolkit, while mounting real-time monitoring endpoints on <code>http://127.0.0.1:3080/api/dsh-swarm/*</code>.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Telegram Hermes Remote Control Simulator -->
+    <section id="telegram" class="section" aria-labelledby="telegram-title">
+      <div class="section-header">
+        <div class="section-tag">Hermes Protocol</div>
+        <h2 id="telegram-title" class="section-title">Control the Swarm from Telegram</h2>
+        <p class="section-desc">
+          Interact with your autonomous swarm anywhere, anytime. Test the simulated Telegram bot below!
+        </p>
+      </div>
+
+      <div class="telegram-simulator">
+        <div class="tg-header">
+          <div class="tg-header-left">
+            <div class="tg-avatar" aria-hidden="true">🐝</div>
+            <div class="tg-info">
+              <div class="tg-name">DSH Hermes Swarm Bot</div>
+              <div class="tg-status">bot • online</div>
+            </div>
+          </div>
+          <div style="font-size: 0.8rem; color: #5288C1;">v1.0.0</div>
+        </div>
+
+        <!-- Chat Body -->
+        <div id="tg-body" class="tg-body" aria-live="polite">
+          <div class="tg-msg tg-msg-in">
+            <div class="tg-msg-header">DSH Hermes Swarm Bot</div>
+            <div>
+              👋 Welcome! I am your <b>DeepSeek Harness Swarm Controller</b>.<br>
+              You can send me high-level tasks or use slash commands like <code>/swarm</code>, <code>/status</code>, <code>/mcp</code>, or <code>/skills</code>.
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Command Chips -->
+        <div class="tg-chips">
+          <button class="tg-chip" data-cmd="/swarm Build financial data aggregator" type="button">🚀 /swarm Build financial aggregator</button>
+          <button class="tg-chip" data-cmd="/status" type="button">📊 /status</button>
+          <button class="tg-chip" data-cmd="/mcp" type="button">⚡ /mcp</button>
+          <button class="tg-chip" data-cmd="/skills" type="button">🧠 /skills</button>
+          <button class="tg-chip" data-cmd="/agents" type="button">👥 /agents</button>
+          <button class="tg-chip" data-cmd="/help" type="button">❓ /help</button>
+        </div>
+
+        <!-- Input Bar -->
+        <div class="tg-input-bar">
+          <input id="tg-input" class="tg-input" type="text" placeholder="Type a command or mission objective..." aria-label="Telegram chat input">
+          <button id="tg-send-btn" class="tg-send-btn" type="button" aria-label="Send message">➤</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Autonomous 4-Step Pipeline -->
+    <section class="section" aria-labelledby="pipeline-title">
+      <div class="section-header">
+        <div class="section-tag">Execution Workflow</div>
+        <h2 id="pipeline-title" class="section-title">The Autonomous Lifecycle</h2>
+        <p class="section-desc">
+          How goals transition into verified deliverables without human intervention.
+        </p>
+      </div>
+
+      <div class="pipeline-container">
+        <div class="pipeline-step">
+          <div class="step-num">STEP 01</div>
+          <h3 class="step-title">Goal Planning</h3>
+          <p class="step-desc">
+            Lead Coordinator and Architect analyze the prompt, structure subtasks, and post the strategic roadmap to the Blackboard.
+          </p>
+        </div>
+
+        <div class="pipeline-step">
+          <div class="step-num">STEP 02</div>
+          <h3 class="step-title">Specialist Collaboration</h3>
+          <p class="step-desc">
+            Subagents work in parallel or dependency chains, sending direct peer messages to align on contracts and schemas.
+          </p>
+        </div>
+
+        <div class="pipeline-step">
+          <div class="step-num">STEP 03</div>
+          <h3 class="step-title">MCP & Skill Execution</h3>
+          <p class="step-desc">
+            Tools on connected MCP servers (ClickUp, Browser, Playwright, Memory) and local skills are invoked automatically.
+          </p>
+        </div>
+
+        <div class="pipeline-step">
+          <div class="step-num">STEP 04</div>
+          <h3 class="step-title">Adversarial Verification</h3>
+          <p class="step-desc">
+            The Critic Agent audits outputs. Upon discovering flaws, it triggers an automated self-healing loop until validated.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Technical Documentation & API Reference -->
+    <section id="docs" class="section" aria-labelledby="docs-title">
+      <div class="section-header">
+        <div class="section-tag">Technical Reference</div>
+        <h2 id="docs-title" class="section-title">Installation & Configuration</h2>
+        <p class="section-desc">
+          Step-by-step setup for DeepSeek Harness Web Profile.
+        </p>
+      </div>
+
+      <div class="bento-card" style="margin-bottom: 2rem;">
+        <h3 class="card-title">1. Cordis Configuration Patch</h3>
+        <p class="card-text">
+          Add the following block to your <code>~/.dsh/profiles/web/cordis.patch.yml</code>:
+        </p>
+        <div class="code-block">
+- insert:
+    - id: agentic-swarm
+      name: "dsh-agentic-swarm"
+      config:
+        telegram:
+          enabled: true
+          botToken: "YOUR_TELEGRAM_BOT_TOKEN"
+          allowedUsers: ["YOUR_TELEGRAM_USER_ID"]
+          pollIntervalMs: 1500
+        autonomous:
+          maxSteps: 30
+          autoExecuteMcp: true
+          autoExecuteSkills: true
+          criticReview: true
+          selfHealing: true
+        agents:
+          defaultCoordinator: "lead-coordinator"
+        </div>
+      </div>
+
+      <div class="bento-card">
+        <h3 class="card-title">2. Registered Model-Facing DSH Tools</h3>
+        <table class="docs-table">
+          <thead>
+            <tr>
+              <th>Tool Name</th>
+              <th>Arguments</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>swarm_dispatch</code></td>
+              <td><code>goal</code>, <code>maxSteps</code></td>
+              <td>Launches an autonomous multi-agent swarm mission with full step breakdown, MCP execution, and review.</td>
+            </tr>
+            <tr>
+              <td><code>swarm_status</code></td>
+              <td><i>none</i></td>
+              <td>Snapshot of active mission, queued tasks, registered agents, metrics, and message bus history.</td>
+            </tr>
+            <tr>
+              <td><code>swarm_broadcast</code></td>
+              <td><code>message</code></td>
+              <td>Broadcasts text guidance to all agents on the swarm message bus.</td>
+            </tr>
+            <tr>
+              <td><code>swarm_message</code></td>
+              <td><code>to</code>, <code>content</code></td>
+              <td>Sends a direct peer-to-peer message to a specific agent in the swarm.</td>
+            </tr>
+            <tr>
+              <td><code>swarm_telegram_notify</code></td>
+              <td><code>chatId</code>, <code>message</code></td>
+              <td>Sends a notification or report directly to the configured Telegram chat.</td>
+            </tr>
+            <tr>
+              <td><code>swarm_tool_exec</code></td>
+              <td><code>toolName</code>, <code>args</code></td>
+              <td>Allows autonomous subagents to execute registered MCP or system tools without human prompt.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: gap: 1rem;">
+      <div>
+        Designed for <a href="https://github.com/deepseek-ai/deepseek-harness" target="_blank" rel="noopener">DeepSeek Harness</a>. Apple Aesthetics &copy; 2026 openthot.
+      </div>
+      <div>
+        Released under the <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT License</a>.
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
