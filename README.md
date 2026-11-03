@@ -1,6 +1,7 @@
 # 🐝 DSH Agentic Swarm & Telegram Hermes Remote Control
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Live Website](https://img.shields.io/badge/Website-Apple_Aesthetics-black.svg?style=flat&logo=apple)](https://openthot.github.io/dsh-agentic-swarm/)
 [![Platform: DeepSeek Harness](https://img.shields.io/badge/Platform-DeepSeek_Harness_0.2.1-purple.svg)](https://github.com/deepseek-ai/deepseek-harness)
 [![Hermes Protocol](https://img.shields.io/badge/Remote_Control-Telegram_Hermes-0088cc.svg)](https://telegram.org)
 [![MCP Ready](https://img.shields.io/badge/Tools-MCP_&_Skills_Autonomous-success.svg)](https://modelcontextprotocol.io)
