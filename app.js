@@ -1,88 +1,466 @@
 /**
- * DSH Agentic Swarm - Showcase Interactive Script
- * Apple Aesthetics • Topology Visualizer • Hermes Telegram Simulator
+ * DSH Agentic Swarm - Developer Documentation & Three.js 3D Showcase
+ * Real-time 3D Mesh • Raycasting • Developer Inspector • Hermes Simulator
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  initTopologyVisualizer();
+  initThreeJsSwarm();
+  initDeveloperTabs();
   initTelegramSimulator();
   initCopyButtons();
 });
 
 // -------------------------------------------------------------
-// 1. Swarm Topology Visualizer
+// Agent Specifications & Telemetry Data
 // -------------------------------------------------------------
 const AGENTS_DATA = {
   coordinator: {
     name: 'Swarm Lead Coordinator',
     role: 'lead-coordinator',
+    color: 0x2997FF,
     status: 'ACTIVE • SUPERVISING',
     capabilities: ['Dynamic Planning', 'Subtask Delegation', 'Synthesis'],
-    prompt: 'Analyzes high-level objectives, decomposes missions into prioritized subtasks, supervises specialist progress, and synthesizes verified deliverables.'
+    metrics: { messages: 142, tools: 28, uptime: '99.98%' },
+    prompt: `You are the Swarm Lead Coordinator. Your mission is to analyze high-level user objectives, formulate an actionable multi-agent plan, delegate specialized subtasks to Architect, Researcher, Coder, and MCP Specialist, supervise execution, resolve bottlenecks, and synthesize final deliverables with precision.`
   },
   architect: {
     name: 'System Architect',
     role: 'architect',
-    status: 'IDLE • READY',
+    color: 0xAF52DE,
+    status: 'IDLE • STANDBY',
     capabilities: ['Architecture Design', 'API Contracts', 'Invariants'],
-    prompt: 'Defines clean technical boundaries, interface contracts, and data structures. Ensures system compliance with strict architectural standards.'
+    metrics: { messages: 84, tools: 12, uptime: '99.95%' },
+    prompt: `You are the System Architect agent. You define clear technical boundaries, schemas, file structures, and data flows. You evaluate technical tradeoffs and verify that all proposed implementations conform to clean architectural design.`
   },
   researcher: {
     name: 'Intelligence & Research',
     role: 'researcher',
+    color: 0x30D158,
     status: 'IDLE • READY',
     capabilities: ['Autonomous Web Search', 'Doc Reading', 'Intelligence'],
-    prompt: 'Autonomously gathers authoritative intelligence, parses documentation, verifies external schemas, and supplies real-time context to the swarm.'
-  },
-  mcp: {
-    name: 'MCP & Skill Orchestrator',
-    role: 'mcp-specialist',
-    status: 'ACTIVE • EXECUTING TOOLS',
-    capabilities: ['MCP Discovery', 'Tool Calling', 'Skills Invocation'],
-    prompt: 'Directly interfaces with Model Context Protocol (MCP) servers (Playwright, ClickUp, Memory, Filesystem) and DSH skills without human intervention.'
+    metrics: { messages: 96, tools: 34, uptime: '99.92%' },
+    prompt: `You are the Researcher agent. You autonomously scour online sources, documentation, local files, and knowledge bases. You extract key facts, cite authoritative references, and feed structured insights back to the swarm.`
   },
   coder: {
     name: 'Autonomous Engineer',
     role: 'coder',
+    color: 0xFFA657,
     status: 'WORKING • REFACTORING',
     capabilities: ['Code Generation', 'Automated Testing', 'File Ops'],
-    prompt: 'Writes clean, modular code, runs automated test suites, inspects error traces, and refactors components until all invariants pass.'
+    metrics: { messages: 218, tools: 65, uptime: '99.99%' },
+    prompt: `You are the Autonomous Coder and Engineer. You write clean, typed, modular code adhering to modern best practices. You execute scripts, run automated tests, inspect error traces, and iteratively fix defects until all criteria are satisfied.`
+  },
+  mcp: {
+    name: 'MCP & Skill Orchestrator',
+    role: 'mcp-specialist',
+    color: 0x2997FF,
+    status: 'ACTIVE • EXECUTING TOOLS',
+    capabilities: ['MCP Discovery', 'Tool Calling', 'Skills Invocation'],
+    metrics: { messages: 188, tools: 94, uptime: '100.0%' },
+    prompt: `You are the MCP & Skill Orchestrator. You discover and execute Model Context Protocol (MCP) servers and DSH skills autonomously. You format tool calls, inspect responses, handle pagination, and bridge external services directly into the swarm.`
   },
   critic: {
     name: 'Adversarial Critic & Verifier',
     role: 'critic',
-    status: 'ACTIVE • SELF-HEALING',
+    color: 0xFF375F,
+    status: 'ACTIVE • AUDITING',
     capabilities: ['Adversarial Review', 'Security Audit', 'Self-Healing'],
-    prompt: 'Rigorously inspects agent outputs for bugs, performance bottlenecks, and security oversights. Triggers automated self-healing loops upon detecting defects.'
+    metrics: { messages: 112, tools: 18, uptime: '99.96%' },
+    prompt: `You are the Adversarial Critic and Verifier. You scrutinize all outputs, code, and plans generated by other agents. You hunt for bugs, unhandled edge cases, security vulnerabilities, or incomplete requirements, issuing concrete correction directives before any task is deemed done.`
   }
 };
 
-function initTopologyVisualizer() {
-  const nodes = document.querySelectorAll('.agent-node');
-  const inspectorTitle = document.getElementById('inspector-title');
-  const inspectorStatus = document.getElementById('inspector-status');
-  const inspectorPrompt = document.getElementById('inspector-prompt');
-  const inspectorCaps = document.getElementById('inspector-caps');
+// -------------------------------------------------------------
+// 1. Three.js 3D Swarm Visualizer
+// -------------------------------------------------------------
+function initThreeJsSwarm() {
+  const container = document.getElementById('threejs-container');
+  const canvas = document.getElementById('threejs-canvas');
+  if (!container || !canvas || typeof THREE === 'undefined') {
+    console.warn('[Swarm 3D] Three.js not loaded, skipping 3D mesh rendering.');
+    return;
+  }
 
-  nodes.forEach(node => {
-    node.addEventListener('click', () => {
-      nodes.forEach(n => n.classList.remove('active'));
-      node.classList.add('active');
+  const width = container.clientWidth;
+  const height = container.clientHeight;
 
-      const agentKey = node.getAttribute('data-agent');
-      const data = AGENTS_DATA[agentKey];
-      if (!data) return;
+  // Scene, Camera, Renderer
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x000000, 0.035);
 
-      inspectorTitle.textContent = data.name;
-      inspectorStatus.innerHTML = `<span class="dot"></span> ${data.status}`;
-      inspectorPrompt.textContent = data.prompt;
-      inspectorCaps.innerHTML = data.capabilities.map(c => `<span class="card-badge badge-blue">${c}</span>`).join(' ');
+  const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+  camera.position.set(0, 8, 22);
+
+  const renderer = new THREE.WebGLRenderer({
+    canvas: canvas,
+    antialias: true,
+    alpha: true,
+    powerPreference: 'high-performance'
+  });
+  renderer.setSize(width, height);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+  // Ambient & Directional Lights
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+  scene.add(ambientLight);
+
+  const blueLight = new THREE.PointLight(0x2997FF, 2.5, 50);
+  blueLight.position.set(0, 10, 10);
+  scene.add(blueLight);
+
+  const purpleLight = new THREE.PointLight(0xAF52DE, 1.8, 40);
+  purpleLight.position.set(-15, -5, -5);
+  scene.add(purpleLight);
+
+  // Group for the entire rotating swarm
+  const swarmGroup = new THREE.Group();
+  scene.add(swarmGroup);
+
+  // 1.1 Ambient Starfield Dust
+  const particleCount = 350;
+  const particleGeo = new THREE.BufferGeometry();
+  const particlePositions = new Float32Array(particleCount * 3);
+  for (let i = 0; i < particleCount * 3; i += 3) {
+    particlePositions[i] = (Math.random() - 0.5) * 45;
+    particlePositions[i + 1] = (Math.random() - 0.5) * 30;
+    particlePositions[i + 2] = (Math.random() - 0.5) * 45;
+  }
+  particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+  const particleMat = new THREE.PointsMaterial({
+    color: 0x708499,
+    size: 0.12,
+    transparent: true,
+    opacity: 0.5
+  });
+  const starField = new THREE.Points(particleGeo, particleMat);
+  scene.add(starField);
+
+  // 1.2 Agent 3D Mesh Nodes
+  const agentMeshes = [];
+  const nodeLayout = [
+    { key: 'coordinator', pos: [0, 1.2, 0], radius: 1.5, geo: 'icosahedron' },
+    { key: 'architect', pos: [-6, 3, -2], radius: 0.95, geo: 'octahedron' },
+    { key: 'researcher', pos: [6, 3, -1], radius: 0.95, geo: 'sphere' },
+    { key: 'coder', pos: [7, -2.5, 3], radius: 1.0, geo: 'box' },
+    { key: 'mcp', pos: [-7, -2.5, 2], radius: 1.0, geo: 'cylinder' },
+    { key: 'critic', pos: [0, -4.5, -3], radius: 1.05, geo: 'tetrahedron' }
+  ];
+
+  nodeLayout.forEach(item => {
+    const data = AGENTS_DATA[item.key];
+    let geometry;
+    switch (item.geo) {
+      case 'icosahedron':
+        geometry = new THREE.IcosahedronGeometry(item.radius, 1);
+        break;
+      case 'octahedron':
+        geometry = new THREE.OctahedronGeometry(item.radius, 0);
+        break;
+      case 'box':
+        geometry = new THREE.BoxGeometry(item.radius * 1.5, item.radius * 1.5, item.radius * 1.5);
+        break;
+      case 'cylinder':
+        geometry = new THREE.CylinderGeometry(item.radius, item.radius, item.radius * 1.6, 6);
+        break;
+      case 'tetrahedron':
+        geometry = new THREE.TetrahedronGeometry(item.radius * 1.2, 0);
+        break;
+      default:
+        geometry = new THREE.SphereGeometry(item.radius, 24, 24);
+    }
+
+    // Material with wireframe & core
+    const material = new THREE.MeshStandardMaterial({
+      color: data.color,
+      roughness: 0.2,
+      metalness: 0.8,
+      emissive: data.color,
+      emissiveIntensity: item.key === 'coordinator' ? 0.45 : 0.25,
+      wireframe: false
+    });
+
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(...item.pos);
+    mesh.userData = { key: item.key, data, basePos: [...item.pos], baseRadius: item.radius };
+
+    // Outer wireframe halo
+    const wireMat = new THREE.MeshBasicMaterial({
+      color: data.color,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.35
+    });
+    const wireMesh = new THREE.Mesh(geometry.clone(), wireMat);
+    wireMesh.scale.set(1.25, 1.25, 1.25);
+    mesh.add(wireMesh);
+
+    swarmGroup.add(mesh);
+    agentMeshes.push(mesh);
+  });
+
+  // 1.3 3D Communication Line Beams
+  const linesMaterial = new THREE.LineBasicMaterial({
+    color: 0x2997FF,
+    transparent: true,
+    opacity: 0.32,
+    linewidth: 1.5
+  });
+
+  const connectionPairs = [
+    ['coordinator', 'architect'],
+    ['coordinator', 'researcher'],
+    ['coordinator', 'mcp'],
+    ['coordinator', 'coder'],
+    ['architect', 'coder'],
+    ['researcher', 'mcp'],
+    ['mcp', 'coder'],
+    ['coder', 'critic'],
+    ['critic', 'coordinator']
+  ];
+
+  const lineObjects = [];
+  connectionPairs.forEach(([k1, k2]) => {
+    const m1 = agentMeshes.find(m => m.userData.key === k1);
+    const m2 = agentMeshes.find(m => m.userData.key === k2);
+    if (!m1 || !m2) return;
+
+    const points = [m1.position, m2.position];
+    const geo = new THREE.BufferGeometry().setFromPoints(points);
+    const line = new THREE.Line(geo, linesMaterial);
+    swarmGroup.add(line);
+    lineObjects.push({ line, m1, m2 });
+  });
+
+  // 1.4 Raycasting & Mouse Interaction
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2(-999, -999);
+  let mouseTargetX = 0;
+  let mouseTargetY = 0;
+  let hoveredMesh = null;
+  let selectedKey = 'coordinator';
+
+  canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    mouseTargetX = mouse.x * 2.5;
+    mouseTargetY = mouse.y * 1.8;
+  });
+
+  canvas.addEventListener('mouseleave', () => {
+    mouse.x = -999;
+    mouse.y = -999;
+    mouseTargetX = 0;
+    mouseTargetY = 0;
+  });
+
+  canvas.addEventListener('click', () => {
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(agentMeshes);
+    if (intersects.length > 0) {
+      const clickedMesh = intersects[0].object;
+      selectAgent(clickedMesh.userData.key);
+    }
+  });
+
+  function selectAgent(key) {
+    selectedKey = key;
+    const data = AGENTS_DATA[key];
+    if (!data) return;
+
+    // Update inspector sidebar
+    const titleEl = document.getElementById('sidebar-title');
+    const roleEl = document.getElementById('sidebar-role');
+    const statusEl = document.getElementById('sidebar-status');
+    const promptEl = document.getElementById('sidebar-prompt');
+    const metricMsg = document.getElementById('metric-messages');
+    const metricTools = document.getElementById('metric-tools');
+    const metricUptime = document.getElementById('metric-uptime');
+
+    if (titleEl) titleEl.textContent = data.name;
+    if (roleEl) roleEl.textContent = `@${data.role}`;
+    if (statusEl) statusEl.innerHTML = `<span class="dot" style="background:#2997FF;box-shadow:0 0 6px #2997FF"></span> ${data.status}`;
+    if (promptEl) promptEl.textContent = data.prompt;
+    if (metricMsg) metricMsg.textContent = data.metrics.messages;
+    if (metricTools) metricTools.textContent = data.metrics.tools;
+    if (metricUptime) metricUptime.textContent = data.metrics.uptime;
+
+    // Pulse the mesh in 3D
+    const targetMesh = agentMeshes.find(m => m.userData.key === key);
+    if (targetMesh) {
+      targetMesh.scale.set(1.4, 1.4, 1.4);
+      setTimeout(() => targetMesh.scale.set(1, 1, 1), 350);
+    }
+  }
+
+  // 1.5 Animation Loop
+  let clock = new THREE.Clock();
+
+  function animate() {
+    requestAnimationFrame(animate);
+    const elapsedTime = clock.getElapsedTime();
+
+    // Gentle global rotation
+    swarmGroup.rotation.y = elapsedTime * 0.12;
+
+    // Camera mouse parallax
+    camera.position.x += (mouseTargetX - camera.position.x) * 0.05;
+    camera.position.y += (8 + mouseTargetY - camera.position.y) * 0.05;
+    camera.lookAt(0, 0, 0);
+
+    // Floating bobbing effect on agents
+    agentMeshes.forEach((mesh, idx) => {
+      mesh.rotation.x = elapsedTime * 0.35 + idx;
+      mesh.rotation.y = elapsedTime * 0.45 + idx;
+      const base = mesh.userData.basePos;
+      mesh.position.y = base[1] + Math.sin(elapsedTime * 1.5 + idx) * 0.25;
+    });
+
+    // Update connection lines
+    lineObjects.forEach(({ line, m1, m2 }) => {
+      const positions = line.geometry.attributes.position.array;
+      positions[0] = m1.position.x;
+      positions[1] = m1.position.y;
+      positions[2] = m1.position.z;
+      positions[3] = m2.position.x;
+      positions[4] = m2.position.y;
+      positions[5] = m2.position.z;
+      line.geometry.attributes.position.needsUpdate = true;
+    });
+
+    // Raycast hover detection
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(agentMeshes);
+    if (intersects.length > 0) {
+      const hit = intersects[0].object;
+      if (hoveredMesh !== hit) {
+        if (hoveredMesh) hoveredMesh.material.emissiveIntensity = 0.25;
+        hoveredMesh = hit;
+        hoveredMesh.material.emissiveIntensity = 0.85;
+      }
+    } else if (hoveredMesh) {
+      hoveredMesh.material.emissiveIntensity = 0.25;
+      hoveredMesh = null;
+    }
+
+    renderer.render(scene, camera);
+  }
+
+  animate();
+
+  // Resize handler
+  window.addEventListener('resize', () => {
+    const newW = container.clientWidth;
+    const newH = container.clientHeight;
+    camera.aspect = newW / newH;
+    camera.updateProjectionMatrix();
+    renderer.setSize(newW, newH);
+  });
+}
+
+// -------------------------------------------------------------
+// 2. Developer Architecture Tabs
+// -------------------------------------------------------------
+const DEV_SNIPPETS = {
+  lifecycle: `<span class="code-comment">// Cordis Plugin Lifecycle Implementation (lib/index.js)</span>
+<span class="code-keyword">import</span> { defineTool } <span class="code-keyword">from</span> <span class="code-str">'@deepseek-ai/dsh-tools'</span>;
+
+<span class="code-keyword">export const</span> name = <span class="code-str">'dsh-agentic-swarm'</span>;
+<span class="code-keyword">export const</span> inject = [<span class="code-str">'tools'</span>, <span class="code-str">'webServer'</span>];
+
+<span class="code-keyword">export function</span> <span class="code-fn">apply</span>(ctx, config = {}) {
+  <span class="code-comment">// 1. Reactive Cordis Service Injection</span>
+  ctx.<span class="code-fn">inject</span>([<span class="code-str">'tools'</span>], (sctx) => {
+    sctx.<span class="code-fn">effect</span>(() => {
+      <span class="code-keyword">const</span> dispose = sctx.tools.<span class="code-fn">register</span>(
+        <span class="code-fn">defineTool</span>({
+          name: <span class="code-str">'swarm_dispatch'</span>,
+          description: <span class="code-str">'Launch autonomous multi-agent swarm mission'</span>,
+          parameters: {
+            goal: { type: <span class="code-str">'string'</span>, description: <span class="code-str">'Mission objective'</span> },
+            maxSteps: { type: <span class="code-str">'number'</span>, default: 30 }
+          },
+          <span class="code-keyword">async</span> <span class="code-fn">execute</span>(args) {
+            <span class="code-keyword">return await</span> coordinator.<span class="code-fn">runAutonomousMission</span>(args.goal);
+          }
+        })
+      );
+      <span class="code-keyword">return</span> dispose; <span class="code-comment">// Quiescent disposal on unmount</span>
+    });
+  });
+}`,
+
+  customAgent: `<span class="code-comment">// Registering a Custom Specialized Subagent (lib/agent.js)</span>
+<span class="code-keyword">import</span> { SwarmAgent } <span class="code-keyword">from</span> <span class="code-str">'dsh-agentic-swarm'</span>;
+
+<span class="code-keyword">const</span> quantAgent = <span class="code-keyword">new</span> <span class="code-fn">SwarmAgent</span>({
+  id: <span class="code-str">'options-quant-specialist'</span>,
+  name: <span class="code-str">'Quantitative Volatility Specialist'</span>,
+  role: <span class="code-str">'quant'</span>,
+  capabilities: [<span class="code-str">'gex-modeling'</span>, <span class="code-str">'vanna-charm'</span>, <span class="code-str">'mcp'</span>],
+  toolsWhitelist: [<span class="code-str">'traderwai_*'</span>, <span class="code-str">'clickup_*'</span>, <span class="code-str">'web_search'</span>],
+  systemPrompt: <span class="code-str">\`You are the Quant Volatility specialist in the DSH Swarm.
+Evaluate option open interest, gamma exposure (GEX), and dealer positioning.
+Autonomously invoke market data MCP tools and format findings for the Coder agent.\`</span>
+});
+
+<span class="code-comment">// Plug directly into coordinator</span>
+coordinator.<span class="code-fn">registerAgent</span>(quantAgent);`,
+
+  mcpAutonomy: `<span class="code-comment">// Autonomous MCP Discovery & Zero-Intervention Execution (lib/mcp-bridge.js)</span>
+<span class="code-keyword">class</span> MCPBridge {
+  <span class="code-keyword">async</span> <span class="code-fn">executeTool</span>(toolName, args = {}) {
+    <span class="code-keyword">const</span> tool = <span class="code-keyword">this</span>.registeredTools.<span class="code-fn">get</span>(toolName);
+    <span class="code-keyword">if</span> (!tool) <span class="code-keyword">throw new</span> <span class="code-fn">Error</span>(<span class="code-str">\`Tool "\${toolName}" not discovered.\`</span>);
+
+    <span class="code-comment">// Execute autonomously without prompting operator</span>
+    <span class="code-keyword">const</span> result = <span class="code-keyword">await</span> tool.<span class="code-fn">execute</span>(args);
+
+    <span class="code-comment">// Post result onto Swarm Message Bus</span>
+    bus.<span class="code-fn">postToolEvent</span>(<span class="code-str">'mcp-specialist'</span>, toolName, args, result);
+    <span class="code-keyword">return</span> { ok: <span class="code-keyword">true</span>, result };
+  }
+}`,
+
+  telegramHermes: `<span class="code-comment">// Hermes-Style Telegram Gateway with Native Fetch Long-Polling (lib/telegram.js)</span>
+<span class="code-keyword">export class</span> TelegramBotClient {
+  <span class="code-keyword">async</span> <span class="code-fn">handleUpdate</span>(update) {
+    <span class="code-keyword">const</span> { message } = update;
+    <span class="code-keyword">if</span> (!message?.text) <span class="code-keyword">return</span>;
+
+    <span class="code-comment">// Whitelist security enforcement</span>
+    <span class="code-keyword">if</span> (!<span class="code-keyword">this</span>.allowedUsers.<span class="code-fn">includes</span>(String(message.from.id))) {
+      <span class="code-keyword">return await this</span>.<span class="code-fn">sendMessage</span>(message.chat.id, <span class="code-str">'⛔ Access Denied'</span>);
+    }
+
+    <span class="code-comment">// Dispatch autonomous multi-agent swarm mission</span>
+    <span class="code-keyword">if</span> (message.text.<span class="code-fn">startsWith</span>(<span class="code-str">'/swarm'</span>)) {
+      <span class="code-keyword">const</span> goal = message.text.<span class="code-fn">replace</span>(<span class="code-str">'/swarm'</span>, <span class="code-str">''</span>).<span class="code-fn">trim</span>();
+      <span class="code-keyword">await this</span>.<span class="code-fn">onMissionDispatch</span>({ goal, chatId: message.chat.id });
+    }
+  }
+}`
+};
+
+function initDeveloperTabs() {
+  const tabs = document.querySelectorAll('.dev-tab-btn');
+  const codeContent = document.getElementById('code-content');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      const snippetKey = tab.getAttribute('data-tab');
+      if (DEV_SNIPPETS[snippetKey] && codeContent) {
+        codeContent.innerHTML = DEV_SNIPPETS[snippetKey];
+      }
     });
   });
 }
 
 // -------------------------------------------------------------
-// 2. Hermes Telegram Bot Simulator
+// 3. Hermes Telegram Bot Simulator
 // -------------------------------------------------------------
 function initTelegramSimulator() {
   const body = document.getElementById('tg-body');
@@ -91,6 +469,7 @@ function initTelegramSimulator() {
   const chips = document.querySelectorAll('.tg-chip');
 
   function appendMessage(sender, text, isOut = false) {
+    if (!body) return;
     const msg = document.createElement('div');
     msg.className = `tg-msg ${isOut ? 'tg-msg-out' : 'tg-msg-in'}`;
     
@@ -110,16 +489,15 @@ function initTelegramSimulator() {
   }
 
   function handleSend(userText) {
-    const text = userText || input.value.trim();
+    const text = userText || (input ? input.value.trim() : '');
     if (!text) return;
-    input.value = '';
+    if (input) input.value = '';
 
-    appendMessage('You', text, true);
+    appendMessage('Operator', text, true);
 
-    // Simulate typing & autonomous response
     setTimeout(() => {
       respondToCommand(text);
-    }, 600);
+    }, 550);
   }
 
   function respondToCommand(rawText) {
@@ -127,77 +505,79 @@ function initTelegramSimulator() {
     const lower = text.toLowerCase();
 
     if (lower === '/help' || lower === '/start') {
-      appendMessage('Hermes Swarm Bot', `🤖 <b>DeepSeek Harness Swarm & Hermes Remote Control</b><br><br>
-Available commands:<br>
-• <code>/swarm &lt;goal&gt;</code> - Launch autonomous multi-agent swarm<br>
-• <code>/status</code> - Live swarm state & metrics<br>
-• <code>/agents</code> - Registered agents & status<br>
-• <code>/mcp</code> - List discovered MCP tools<br>
-• <code>/skills</code> - List autonomous skills<br>
-• <code>/broadcast &lt;msg&gt;</code> - Message the swarm bus<br>
-• <code>/stop</code> - Abort active mission`);
+      appendMessage('Hermes Swarm Bot', `🤖 <b>DeepSeek Harness Swarm Controller</b><br><br>
+Available developer commands:<br>
+• <code>/swarm &lt;goal&gt;</code> - Dispatch autonomous multi-agent mission<br>
+• <code>/status</code> - Real-time metrics, active subagents & task queue<br>
+• <code>/agents</code> - Inspect registered specialized agent personas<br>
+• <code>/mcp</code> - List discovered Model Context Protocol servers<br>
+• <code>/skills</code> - List autonomous DSH skills<br>
+• <code>/broadcast &lt;msg&gt;</code> - Inject operator message onto swarm bus<br>
+• <code>/stop</code> - Immediately halt running swarm execution`);
     } else if (lower === '/status') {
-      appendMessage('Hermes Swarm Bot', `📊 <b>Swarm Live Status</b><br><br>
-• <b>Active Mission:</b> <code>Autonomous Task</code><br>
+      appendMessage('Hermes Swarm Bot', `📊 <b>Swarm Telemetry & Metrics</b><br><br>
+• <b>Active Mission:</b> <code>Options Volatility Scanner</code> (Step 3/4)<br>
 • <b>Registered Agents:</b> 6 active<br>
-• <b>Completed Missions:</b> 42<br>
-• <b>Critic Approvals:</b> 98.4%<br>
-• <b>MCP Tools Active:</b> 28`);
+• <b>Blackboard Entries:</b> 14 items<br>
+• <b>Missions Succeeded:</b> 48 (100%)<br>
+• <b>Critic Revisions:</b> 3 (Auto-Healed ✅)<br>
+• <b>Active MCP Servers:</b> ClickUp, Playwright, Memory, Filesystem`);
     } else if (lower === '/mcp') {
       appendMessage('Hermes Swarm Bot', `⚡ <b>Discovered MCP Tools (Autonomous Mode)</b><br><br>
 • <code>clickup_create_task</code> [ClickUp Server]<br>
 • <code>playwright_browser_click</code> [Browser Server]<br>
-• <code>memory_add_observations</code> [Memory Graph]<br>
-• <code>fs_read_file</code> [Filesystem]<br>
-• <code>web_search_parallel</code> [Deep Search]`);
+• <code>memory_add_observations</code> [Knowledge Graph]<br>
+• <code>fs_read_file</code> [Filesystem Service]<br>
+• <code>web_search_parallel</code> [Parallel Search Engine]`);
     } else if (lower === '/agents') {
       appendMessage('Hermes Swarm Bot', `👥 <b>Active Swarm Agents</b><br><br>
-1. <b>Lead Coordinator</b> [ACTIVE]<br>
-2. <b>System Architect</b> [READY]<br>
-3. <b>Intelligence Researcher</b> [READY]<br>
-4. <b>Autonomous Coder</b> [WORKING]<br>
-5. <b>MCP & Skill Orchestrator</b> [ACTIVE]<br>
-6. <b>Adversarial Critic</b> [VERIFYING]`);
+1. <b>Lead Coordinator</b> [ACTIVE • SUPERVISING]<br>
+2. <b>System Architect</b> [READY • BOUNDARY VALIDATION]<br>
+3. <b>Intelligence Researcher</b> [READY • DOC HARVESTING]<br>
+4. <b>Autonomous Coder</b> [WORKING • CODE ENGINE]<br>
+5. <b>MCP & Skill Orchestrator</b> [ACTIVE • TOOL CALLING]<br>
+6. <b>Adversarial Critic</b> [AUDITING • SELF-HEALING]`);
     } else {
-      // Swarm mission execution simulation
       const missionGoal = text.replace(/^\/swarm\s*/i, '');
       simulateAutonomousMission(missionGoal);
     }
   }
 
   function simulateAutonomousMission(goal) {
-    appendMessage('Hermes Swarm Bot', `🚀 <b>Swarm Mission Activated:</b> "${goal}"<br><i>Lead Coordinator formulating plan...</i>`);
+    appendMessage('Hermes Swarm Bot', `🚀 <b>Swarm Mission Dispatched:</b> "${goal}"<br><i>Lead Coordinator decomposing into subtasks...</i>`);
 
     setTimeout(() => {
-      appendMessage('Swarm Lead Coordinator', `📋 <b>Plan Established (4 Subtasks):</b><br>
-1. [Architect] Define modular contracts<br>
+      appendMessage('Swarm Lead Coordinator', `📋 <b>Mission Plan Established (4 Subtasks):</b><br>
+1. [Architect] Define modular interface contracts<br>
 2. [Researcher] Retrieve context & schemas<br>
-3. [MCP Specialist] Invoke necessary MCP tools<br>
-4. [Coder] Implement logic & tests`);
-    }, 1200);
+3. [MCP Specialist] Invoke necessary MCP tools autonomously<br>
+4. [Coder] Implement logic & automated unit tests`);
+    }, 1100);
 
     setTimeout(() => {
-      appendMessage('MCP & Skill Orchestrator', `⚡ <i>Autonomously invoking MCP tool <code>mcp_fetch_data</code> without user intervention...</i><br>✅ Tool executed successfully (HTTP 200 OK).`);
-    }, 2400);
+      appendMessage('MCP & Skill Orchestrator', `⚡ <i>Autonomously invoking MCP tool <code>mcp_fetch_data</code> without user intervention...</i><br>✅ Tool executed successfully (HTTP 200 OK). Result stored on Blackboard.`);
+    }, 2200);
 
     setTimeout(() => {
       appendMessage('Adversarial Critic', `🔍 <b>Adversarial Verification:</b><br>
-Reviewing deliverables against criteria...<br>
+Auditing generated code against strict contracts...<br>
 ✅ Invariants preserved<br>
 ✅ Zero security flaws<br>
 <b>VERDICT: APPROVED ✅</b>`);
-    }, 3600);
+    }, 3300);
 
     setTimeout(() => {
       appendMessage('Hermes Swarm Bot', `🏁 <b>Swarm Mission Completed Successfully!</b><br><br>
 All subtasks resolved, validated by Critic, and synchronized with DSH Web blackboard.`);
-    }, 4800);
+    }, 4400);
   }
 
-  sendBtn.addEventListener('click', () => handleSend());
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') handleSend();
-  });
+  if (sendBtn) sendBtn.addEventListener('click', () => handleSend());
+  if (input) {
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleSend();
+    });
+  }
 
   chips.forEach(chip => {
     chip.addEventListener('click', () => {
@@ -215,7 +595,7 @@ function formatMarkdown(text) {
 }
 
 // -------------------------------------------------------------
-// 3. One-Click Copy Buttons
+// 4. One-Click Copy Buttons
 // -------------------------------------------------------------
 function initCopyButtons() {
   document.querySelectorAll('.copy-btn').forEach(btn => {
