@@ -1,0 +1,54 @@
+{
+  "name": "dsh-agentic-swarm",
+  "version": "1.0.0",
+  "description": "Autonomous multi-agent swarm and Telegram Hermes-style remote control plugin for DeepSeek Harness (DSH). Orchestrates agents and subagents with peer-to-peer messaging, shared blackboard memory, autonomous MCP tool and skill execution without human intervention.",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "cordis",
+    "agentic-swarm",
+    "multi-agent",
+    "subagents",
+    "swarm",
+    "telegram-bot",
+    "hermes",
+    "mcp",
+    "skills",
+    "autonomous-agent"
+  ],
+  "license": "MIT",
+  "author": "openthot",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/openthot/dsh-agentic-swarm.git"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "label": "dsh plugin"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

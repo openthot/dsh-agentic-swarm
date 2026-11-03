@@ -1,0 +1,25 @@
+# dsh-agentic-swarm bundle patch
+# Registers the Agentic Swarm Orchestrator and Telegram Hermes Bot bridge into DeepSeek Harness.
+- insert:
+    - id: agentic-swarm
+      name: "dsh-agentic-swarm"
+      config:
+        telegram:
+          enabled: false
+          botToken: ""
+          allowedUsers: []
+          pollIntervalMs: 1500
+        autonomous:
+          maxSteps: 30
+          autoExecuteMcp: true
+          autoExecuteSkills: true
+          criticReview: true
+          selfHealing: true
+        agents:
+          defaultCoordinator: "lead-coordinator"
+          enabledSpecialists:
+            - "architect"
+            - "researcher"
+            - "coder"
+            - "mcp-specialist"
+            - "critic"
